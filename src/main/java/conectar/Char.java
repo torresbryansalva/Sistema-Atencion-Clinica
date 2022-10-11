@@ -1,0 +1,6 @@
+
+package conectar;
+
+class Char {
+    
+}
