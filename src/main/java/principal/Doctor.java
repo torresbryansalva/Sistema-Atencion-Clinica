@@ -256,7 +256,12 @@ public class Doctor extends javax.swing.JFrame {
             }
         });
 
-        jButton2.setText("SALIR");
+        jButton2.setText("CERRAR SESION");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -279,9 +284,9 @@ public class Doctor extends javax.swing.JFrame {
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jButton1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(30, 30, 30)
                 .addComponent(jButton2)
-                .addGap(41, 41, 41))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -329,7 +334,7 @@ public class Doctor extends javax.swing.JFrame {
 
     private void btn_dniActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_dniActionPerformed
         // TODO add your handling code here:
-        String dnib=txt_dni.getText();
+        Integer dnib=Integer.parseInt(txt_dni.getText());
         String SQL_DNIBUSCAR="SELECT nombre,apellido,edad FROM dbclinica.datosclientes WHERE dni="+dnib+"";
          try {
             conexion=Conectar.getConnection();
@@ -365,6 +370,11 @@ public class Doctor extends javax.swing.JFrame {
         }
         limpiar();
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+        System.exit(0);
+    }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
      * @param args the command line arguments

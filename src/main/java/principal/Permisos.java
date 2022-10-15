@@ -1,35 +1,34 @@
 
 package principal;
 
+import conectar.Conectar;
+import java.sql.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+
 /**
  *
  * @author Lenovo
  */
 public class Permisos extends javax.swing.JFrame {
-
+    Connection conexion=null;
+   PreparedStatement pstm;
+   ResultSet rs;
+   DefaultTableModel tablamodelo;
     /**
      * Creates new form Empleados
      */
+    @SuppressWarnings("OverridableMethodCallInConstructor")
     public Permisos() {
         initComponents();
         this.setTitle("Clinica ADD");
         this.setLocationRelativeTo(Permisos.this);
         this.setResizable(false);
-        ocultar();
+        consultar();
     }
     
-    public void ocultar(){
-    btn_buscar1.setEnabled(false);
-    btn_buscar2.setEnabled(false);
-    
-    btn_registrar1.setEnabled(false);
-    btn_registar2.setEnabled(false);
-    
-    btn_actualizar1.setEnabled(false);
-    btn_actualizar2.setEnabled(false);
-    
-    btn_eliminar1.setEnabled(false);
-    }
     public void limpiar(){
         txt_apellido.setText("");
         txt_clave.setText("");
@@ -56,7 +55,6 @@ public class Permisos extends javax.swing.JFrame {
         jPanel2 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         txt_dni = new javax.swing.JTextField();
-        btn_buscar1 = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
@@ -65,11 +63,8 @@ public class Permisos extends javax.swing.JFrame {
         txt_usuario = new javax.swing.JTextField();
         txt_clave = new javax.swing.JTextField();
         jSeparator2 = new javax.swing.JSeparator();
-        btn_permisos = new javax.swing.JButton();
         txt_nombre = new javax.swing.JTextField();
         txt_apellido = new javax.swing.JTextField();
-        btn_actualizar1 = new javax.swing.JButton();
-        btn_registrar1 = new javax.swing.JButton();
         btn_eliminar1 = new javax.swing.JButton();
         jLabel8 = new javax.swing.JLabel();
         txt_codempleado = new javax.swing.JTextField();
@@ -80,11 +75,19 @@ public class Permisos extends javax.swing.JFrame {
         txt_correo = new javax.swing.JTextField();
         jLabel11 = new javax.swing.JLabel();
         txt_especialidad = new javax.swing.JTextField();
-        btn_empleados = new javax.swing.JButton();
         btn_buscar2 = new javax.swing.JButton();
         btn_registar2 = new javax.swing.JButton();
         btn_actualizar2 = new javax.swing.JButton();
+        btn_atras = new javax.swing.JButton();
+        btn_limpiar = new javax.swing.JButton();
+        jLabel12 = new javax.swing.JLabel();
+        btn_actualizarempleados = new javax.swing.JButton();
+        jLabel13 = new javax.swing.JLabel();
         jSeparator1 = new javax.swing.JSeparator();
+        jSeparator3 = new javax.swing.JSeparator();
+        jPanel3 = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tb_empleados = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -97,24 +100,22 @@ public class Permisos extends javax.swing.JFrame {
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(190, 190, 190)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabel1)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(361, 361, 361))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(23, Short.MAX_VALUE)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(21, 21, 21)
                 .addComponent(jLabel1)
-                .addGap(19, 19, 19))
+                .addContainerGap(21, Short.MAX_VALUE))
         );
 
-        jPanel2.setBackground(new java.awt.Color(204, 255, 204));
+        jPanel2.setBackground(new java.awt.Color(0, 153, 153));
 
         jLabel2.setText("DNI: ");
-
-        btn_buscar1.setText("BUSCAR");
 
         jLabel3.setText("USUARIO: ");
 
@@ -128,20 +129,13 @@ public class Permisos extends javax.swing.JFrame {
 
         jSeparator2.setForeground(new java.awt.Color(0, 51, 51));
 
-        btn_permisos.setBackground(new java.awt.Color(255, 51, 51));
-        btn_permisos.setForeground(new java.awt.Color(255, 255, 255));
-        btn_permisos.setText("DAR PERMISO DE INGRESO");
-        btn_permisos.addActionListener(new java.awt.event.ActionListener() {
+        btn_eliminar1.setBackground(new java.awt.Color(255, 51, 51));
+        btn_eliminar1.setText("ELIMINAR");
+        btn_eliminar1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btn_permisosActionPerformed(evt);
+                btn_eliminar1ActionPerformed(evt);
             }
         });
-
-        btn_actualizar1.setText("ACTUALIZAR");
-
-        btn_registrar1.setText("REGISTRAR");
-
-        btn_eliminar1.setText("ELIMINAR");
 
         jLabel8.setText("CODIGO EMPLEADO:");
 
@@ -151,61 +145,80 @@ public class Permisos extends javax.swing.JFrame {
 
         jLabel11.setText("ESPECIALIDAD:");
 
-        btn_empleados.setBackground(new java.awt.Color(0, 102, 102));
-        btn_empleados.setForeground(new java.awt.Color(255, 255, 255));
-        btn_empleados.setText("EMPLEADOS ");
-        btn_empleados.addActionListener(new java.awt.event.ActionListener() {
+        btn_buscar2.setText("BUSCAR");
+        btn_buscar2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btn_empleadosActionPerformed(evt);
+                btn_buscar2ActionPerformed(evt);
             }
         });
 
-        btn_buscar2.setText("BUSCAR");
-
         btn_registar2.setText("NUEVO EMPLEADO");
+        btn_registar2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_registar2ActionPerformed(evt);
+            }
+        });
 
-        btn_actualizar2.setText("ACTUALIZAR");
+        btn_actualizar2.setText("ACTUALIZAR PERMISO");
+        btn_actualizar2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_actualizar2ActionPerformed(evt);
+            }
+        });
+
+        btn_atras.setText("<< ATRAS");
+        btn_atras.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_atrasActionPerformed(evt);
+            }
+        });
+
+        btn_limpiar.setText("LIMPIAR");
+        btn_limpiar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_limpiarActionPerformed(evt);
+            }
+        });
+
+        jLabel12.setText("<-- No Actualizable*");
+
+        btn_actualizarempleados.setText("ACTUALIZAR EMPLEADO");
+        btn_actualizarempleados.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_actualizarempleadosActionPerformed(evt);
+            }
+        });
+
+        jLabel13.setText("<-- No Actualizable*");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(90, 90, 90)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(btn_permisos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(btn_actualizar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btn_buscar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(25, 25, 25)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(btn_registrar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btn_eliminar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addGroup(jPanel2Layout.createSequentialGroup()
-                            .addComponent(btn_buscar2, javax.swing.GroupLayout.DEFAULT_SIZE, 98, Short.MAX_VALUE)
-                            .addGap(18, 18, 18)
-                            .addComponent(btn_registar2))
-                        .addComponent(btn_empleados, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(btn_actualizar2))
-                .addGap(82, 82, 82))
-            .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGap(20, 20, 20)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jSeparator2)
+                        .addContainerGap())
+                    .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel3)
-                            .addComponent(jLabel2)
-                            .addComponent(jLabel4))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(txt_usuario)
-                            .addComponent(txt_dni)
-                            .addComponent(txt_clave, javax.swing.GroupLayout.DEFAULT_SIZE, 178, Short.MAX_VALUE))
-                        .addGap(21, 21, 21)
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel3)
+                                    .addComponent(jLabel4))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(txt_usuario)
+                                    .addComponent(txt_clave, javax.swing.GroupLayout.DEFAULT_SIZE, 178, Short.MAX_VALUE))
+                                .addGap(21, 21, 21))
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addComponent(jLabel2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(txt_dni, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(jLabel12)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addGroup(jPanel2Layout.createSequentialGroup()
                                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
@@ -219,18 +232,19 @@ public class Permisos extends javax.swing.JFrame {
                                 .addComponent(jLabel5)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(txt_nombre, javax.swing.GroupLayout.PREFERRED_SIZE, 246, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(33, 33, 33))
+                        .addGap(21, 21, 21))
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 635, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(jPanel2Layout.createSequentialGroup()
                                 .addComponent(jLabel8)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(txt_codempleado, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(92, 92, 92)
+                                .addGap(18, 18, 18)
+                                .addComponent(jLabel13)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(jLabel9)
                                 .addGap(18, 18, 18)
-                                .addComponent(txt_telefono))
+                                .addComponent(txt_telefono, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(jPanel2Layout.createSequentialGroup()
                                 .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
@@ -238,8 +252,22 @@ public class Permisos extends javax.swing.JFrame {
                             .addGroup(jPanel2Layout.createSequentialGroup()
                                 .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
-                                .addComponent(txt_correo, javax.swing.GroupLayout.PREFERRED_SIZE, 263, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addContainerGap(34, Short.MAX_VALUE))))
+                                .addComponent(txt_correo, javax.swing.GroupLayout.PREFERRED_SIZE, 263, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(btn_eliminar1, javax.swing.GroupLayout.DEFAULT_SIZE, 133, Short.MAX_VALUE)
+                                    .addComponent(btn_buscar2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addGap(18, 18, 18)
+                                .addComponent(btn_registar2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 19, Short.MAX_VALUE)
+                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(btn_actualizarempleados, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(btn_actualizar2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addGap(85, 85, 85)
+                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(btn_limpiar, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(btn_atras))))
+                        .addContainerGap(17, Short.MAX_VALUE))))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -249,7 +277,8 @@ public class Permisos extends javax.swing.JFrame {
                     .addComponent(jLabel2)
                     .addComponent(txt_dni, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel5)
-                    .addComponent(txt_nombre, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txt_nombre, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel12))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
@@ -269,7 +298,8 @@ public class Permisos extends javax.swing.JFrame {
                     .addComponent(jLabel8)
                     .addComponent(txt_codempleado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel9)
-                    .addComponent(txt_telefono, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txt_telefono, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel13))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel10)
@@ -278,22 +308,61 @@ public class Permisos extends javax.swing.JFrame {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel11)
                     .addComponent(txt_especialidad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 28, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 23, Short.MAX_VALUE)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btn_permisos)
-                    .addComponent(btn_empleados))
-                .addGap(18, 18, 18)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btn_buscar1)
-                    .addComponent(btn_registrar1)
+                    .addComponent(btn_actualizar2)
+                    .addComponent(btn_limpiar)
                     .addComponent(btn_buscar2)
                     .addComponent(btn_registar2))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btn_actualizar1)
+                .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btn_eliminar1)
-                    .addComponent(btn_actualizar2))
-                .addGap(27, 27, 27))
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(btn_atras)
+                        .addComponent(btn_actualizarempleados)))
+                .addGap(29, 29, 29))
+        );
+
+        jSeparator1.setForeground(new java.awt.Color(0, 51, 51));
+
+        jSeparator3.setForeground(new java.awt.Color(0, 51, 51));
+        jSeparator3.setOrientation(javax.swing.SwingConstants.VERTICAL);
+
+        jPanel3.setBackground(new java.awt.Color(0, 153, 153));
+
+        tb_empleados.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Cod Empleado", "Nombre", "DNI", "Especialidad"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane1.setViewportView(tb_empleados);
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 393, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 362, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(8, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -303,69 +372,243 @@ public class Permisos extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
                     .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(687, 687, 687)
-                        .addComponent(jSeparator1)))
+                        .addGap(6, 6, 6)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jSeparator1))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(3, 3, 3)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 7, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jSeparator3))
+                        .addContainerGap())
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btn_permisosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_permisosActionPerformed
+    private void btn_atrasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_atrasActionPerformed
         // TODO add your handling code here:
-        limpiar();
-        txt_codempleado.setEnabled(false);
-        txt_edad.setEnabled(false);
-        txt_telefono.setEnabled(false);
-        txt_correo.setEnabled(false);
-        txt_especialidad.setEnabled(false);
-        btn_buscar2.setEnabled(false);
-        btn_registar2.setEnabled(false);
-        btn_actualizar2.setEnabled(false);
-        btn_eliminar1.setEnabled(false);
-        
-        btn_buscar1.setEnabled(true);
-        btn_registrar1.setEnabled(true);
-        btn_actualizar1.setEnabled(true);
-        btn_eliminar1.setEnabled(true);
-        
-    }//GEN-LAST:event_btn_permisosActionPerformed
+        this.dispose();
+    }//GEN-LAST:event_btn_atrasActionPerformed
 
-    private void btn_empleadosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_empleadosActionPerformed
+    private void btn_buscar2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_buscar2ActionPerformed
+        // TODO add your handling code here:
+        Integer dni=Integer.parseInt(txt_dni.getText());
+       // Integer dni2=Integer.parseInt(txt_dni.getText());
+        String SQL_BUSCAR_PERMISOS="SELECT usuario,clave FROM dbclinica.permisos WHERE dni="+dni+"";
+        String SQL_BUSCAR_EMPLE="SELECT codempleado,nombre,apellido,edad,telefono,correo,especialidad FROM dbclinica.empleados WHERE dni="+dni+"";
+        try {
+            conexion=Conectar.getConnection();
+            pstm=conexion.prepareStatement(SQL_BUSCAR_PERMISOS);
+            rs=pstm.executeQuery();
+            while(rs.next()){
+                txt_usuario.setText(rs.getString("usuario"));
+                txt_clave.setText(rs.getString("clave"));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Permisos.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(null,"Fallo en permisos");
+        }
+        
+        try {
+            conexion=Conectar.getConnection();
+            pstm=conexion.prepareStatement(SQL_BUSCAR_EMPLE);
+            rs=pstm.executeQuery();
+            while(rs.next()){
+                txt_codempleado.setText(rs.getString("codempleado"));
+                txt_nombre.setText(rs.getString("nombre"));
+                txt_apellido.setText(rs.getString("apellido"));
+                txt_edad.setText(rs.getString("edad"));
+                txt_telefono.setText(rs.getString("telefono"));
+                txt_correo.setText(rs.getString("correo"));
+                txt_especialidad.setText(rs.getString("especialidad"));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Permisos.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(null,"Fallo en empleados");
+        }
+               
+    }//GEN-LAST:event_btn_buscar2ActionPerformed
+
+    private void btn_limpiarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_limpiarActionPerformed
         // TODO add your handling code here:
         limpiar();
-        txt_codempleado.setEnabled(true);
-        txt_edad.setEnabled(true);
-        txt_telefono.setEnabled(true);
-        txt_correo.setEnabled(true);
-        txt_especialidad.setEnabled(true);
-        btn_buscar1.setEnabled(false);
-        btn_registrar1.setEnabled(false);
-        btn_actualizar1.setEnabled(false);
-        btn_eliminar1.setEnabled(false);
-        
         btn_buscar2.setEnabled(true);
         btn_registar2.setEnabled(true);
-        btn_actualizar2.setEnabled(true);
-        
-        
-    }//GEN-LAST:event_btn_empleadosActionPerformed
+        btn_eliminar1.setEnabled(true);
+        btn_atras.setEnabled(true);
+    }//GEN-LAST:event_btn_limpiarActionPerformed
 
+    private void btn_actualizar2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_actualizar2ActionPerformed
+        // TODO add your handling code here:
+        String usuario=txt_usuario.getText();
+        String clave=txt_clave.getText();
+        String nombre=txt_nombre.getText();
+        String apellido=txt_apellido.getText();
+        Integer dni=Integer.parseInt(txt_dni.getText());
+        
+        String SQL_ACTUALIZAR="UPDATE dbclinica.permisos SET usuario='"+usuario+"',clave='"+clave+"',nombre='"+nombre+"',apellido='"+apellido+"' WHERE dni="+dni+"";
+        try {
+            conexion=Conectar.getConnection();
+            pstm=conexion.prepareStatement(SQL_ACTUALIZAR);
+            pstm.executeUpdate();
+            JOptionPane.showMessageDialog(null,"Permisos de ingreso Actualizados");
+        } catch (SQLException ex) {
+            Logger.getLogger(Permisos.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        btn_buscar2.setEnabled(false);
+        btn_registar2.setEnabled(false);
+        btn_eliminar1.setEnabled(false);
+        btn_limpiar.setEnabled(false);
+        btn_atras.setEnabled(false);
+        
+    }//GEN-LAST:event_btn_actualizar2ActionPerformed
+
+    private void btn_actualizarempleadosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_actualizarempleadosActionPerformed
+        // TODO add your handling code here:
+        String nombre=txt_nombre.getText();
+        String apellido=txt_apellido.getText();
+        Integer dni=Integer.parseInt(txt_dni.getText());
+        Integer edad=Integer.parseInt(txt_edad.getText());
+        Integer telefono=Integer.parseInt(txt_telefono.getText());
+        String correo =txt_correo.getText();
+        String esp=txt_especialidad.getText();
+                
+        
+        String SQL_ACTUALIZAR2="UPDATE dbclinica.empleados SET nombre='"+nombre+"',apellido='"+apellido+"',edad="+edad+",telefono="+telefono+",correo='"+correo+"',especialidad='"+esp+"' WHERE dni="+dni+"";
+        try {
+            conexion=Conectar.getConnection();
+            pstm=conexion.prepareStatement(SQL_ACTUALIZAR2);
+            pstm.executeUpdate();
+            JOptionPane.showMessageDialog(null,"Datos Empleado  Actualizados");
+        } catch (SQLException ex) {
+            Logger.getLogger(Permisos.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        btn_limpiar.setEnabled(true);
+        
+    }//GEN-LAST:event_btn_actualizarempleadosActionPerformed
+
+    private void btn_registar2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_registar2ActionPerformed
+        // TODO add your handling code here:
+        boolean exitoso=false;
+        boolean exitoso1=false;
+        String nombre=txt_nombre.getText();
+        String apellido=txt_apellido.getText();
+        Integer dni=Integer.parseInt(txt_dni.getText());
+        String cod=txt_codempleado.getText();
+        Integer edad=Integer.parseInt(txt_edad.getText());
+        Integer telefono=Integer.parseInt(txt_telefono.getText());
+        String correo =txt_correo.getText();
+        String esp=txt_especialidad.getText();
+        
+        String usuario=txt_usuario.getText();
+        String clave=txt_clave.getText();
+        String SQL_INSERTPERMISOS="INSERT INTO dbclinica.permisos(usuario,clave,nombre,apellido,dni) VALUES(?,?,?,?,?)";
+        try {
+            conexion=Conectar.getConnection();
+            pstm=conexion.prepareStatement(SQL_INSERTPERMISOS);
+            pstm.setString(1,usuario);
+            pstm.setString(2,clave);
+            pstm.setString(3,nombre);
+            pstm.setString(4,apellido);
+            pstm.setInt(5,dni);
+            int n=pstm.executeUpdate();
+           if(n>0){
+            exitoso=true;
+           }
+        } catch (SQLException ex) {
+            Logger.getLogger(Permisos.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        
+        
+        String SQL_INSERTAR="INSERT INTO dbclinica.empleados(codempleado,nombre,apellido,edad,dni,telefono,correo,especialidad) VALUES(?,?,?,?,?,?,?,?)";
+        
+        try {
+            conexion=Conectar.getConnection();
+            pstm=conexion.prepareStatement(SQL_INSERTAR);
+            pstm.setString(1,cod);
+            pstm.setString(2,nombre);
+            pstm.setString(3,apellido);
+            pstm.setInt(4,edad);
+            pstm.setInt(5,dni);
+            pstm.setInt(6,telefono);
+            pstm.setString(7,correo);
+            pstm.setString(8,esp);
+            int n=pstm.executeUpdate();
+           if(n>0){
+           exitoso1=true;
+           }
+        } catch (SQLException ex) {
+            Logger.getLogger(Permisos.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        if(exitoso==true && exitoso1==true){
+        JOptionPane.showMessageDialog(null,"Datos Guardados Correctamente");
+        }else{
+        JOptionPane.showMessageDialog(null,"Algo Fallo, Quiza debio Actualizar!!");
+        }
+        
+    }//GEN-LAST:event_btn_registar2ActionPerformed
+
+    private void btn_eliminar1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_eliminar1ActionPerformed
+        int valor=JOptionPane.showConfirmDialog(null,"Quieres eliminar ?");
+        
+        if(valor==0){
+        Integer dni=Integer.parseInt(txt_dni.getText());
+        String SQL_ELIMINAR="DELETE FROM dbclinica.permisos WHERE id="+dni+"";
+        
+        try {
+            conexion=Conectar.getConnection();
+            pstm=conexion.prepareStatement(SQL_ELIMINAR);
+            pstm.executeUpdate();
+            JOptionPane.showMessageDialog(null,"Eliminado Exitosamente");
+        } catch (SQLException ex) {
+            Logger.getLogger(Permisos.class.getName()).log(Level.SEVERE, null, ex);
+        }
+      }
+        
+    }//GEN-LAST:event_btn_eliminar1ActionPerformed
+
+    public void consultar(){
+       
+        String SQL_BUSCARCLIENTES="SELECT codempleado,nombre,dni,especialidad FROM dbclinica.empleados";
+        try {
+            conexion=Conectar.getConnection();
+            pstm=conexion.prepareStatement(SQL_BUSCARCLIENTES);
+            rs=pstm.executeQuery();
+            Object[] empleado=new Object[4];
+            tablamodelo=(DefaultTableModel) tb_empleados.getModel();
+            while(rs.next()){
+                empleado[0]=rs.getString("codempleado");
+                empleado[1]=rs.getString("nombre");
+                empleado[2]=rs.getInt("dni");
+                empleado[3]=rs.getString("especialidad");
+               
+                tablamodelo.addRow(empleado);
+            }
+            tb_empleados.setModel(tablamodelo);
+        } catch (SQLException ex) {
+            Logger.getLogger(Clientes.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     /**
      * @param args the command line arguments
      */
@@ -403,18 +646,18 @@ public class Permisos extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btn_actualizar1;
     private javax.swing.JButton btn_actualizar2;
-    private javax.swing.JButton btn_buscar1;
+    private javax.swing.JButton btn_actualizarempleados;
+    private javax.swing.JButton btn_atras;
     private javax.swing.JButton btn_buscar2;
     private javax.swing.JButton btn_eliminar1;
-    private javax.swing.JButton btn_empleados;
-    private javax.swing.JButton btn_permisos;
+    private javax.swing.JButton btn_limpiar;
     private javax.swing.JButton btn_registar2;
-    private javax.swing.JButton btn_registrar1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -425,8 +668,12 @@ public class Permisos extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
+    private javax.swing.JSeparator jSeparator3;
+    private javax.swing.JTable tb_empleados;
     private javax.swing.JTextField txt_apellido;
     private javax.swing.JTextField txt_clave;
     private javax.swing.JTextField txt_codempleado;
